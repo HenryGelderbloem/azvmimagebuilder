@@ -1,1 +1,0 @@
-Write-Host 'Modified version of sysprep for 26th October sysprep issue, this **must** notbe used past mid November'

@@ -1,0 +1,130 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "2022.03.01.1238",
+    "parameters": {
+        "userManagedIdentityResourceGroup": {
+            "type": "string"
+        },
+        "userManagedIdentityName": {
+            "type": "string"
+        },
+        "imageTemplateName": {
+            "type": "string"
+        },
+        "galleryImageResourceGroup": {
+            "type": "string"
+        },
+        "galleryImageName": {
+            "type": "string"
+        },
+        "imageDefName": {
+            "type": "string"
+        }
+    },
+    
+    "variables": {
+        "api-version": "2021-10-01",
+        "location": "[resourceGroup().location]",
+        "subscriptionId": "[subscription().subscriptionId]",
+        "userManagedIdentityId": "[concat('subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('userManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userManagedIdentityName'))]",
+        "currentYear": "[utcNow('yyyy')]",
+        "currentMonth": "[utcNow('mm')]",
+        "curretnDate": "[utcNow('dd')]",
+        "imageDefVersionNumber": "[concat(variables('currentYear'),'.', variables('currentMonth'), '.', variables('curretnDate'))]"
+    },
+
+
+    "resources": [
+      {
+        "name": "[parameters('imageTemplateName')]",
+        "type": "Microsoft.VirtualMachineImages/imageTemplates",
+        "apiVersion": "[variables('api-version')]",
+        "location": "[variables('location')]",
+        "dependsOn": [],
+        "tags": {},
+            "identity": {
+                "type": "UserAssigned",
+                        "userAssignedIdentities": {
+                        "[variables('userManagedIdentityId')]": {}
+                        }
+                    },
+        
+        "properties": {
+            "buildTimeoutInMinutes" : 120,
+
+            "vmProfile": 
+                    {
+                    "vmSize": "Standard_D2s_v5",
+                    "osDiskSizeGB": 127
+                    },
+        
+            "source": {
+                "type": "PlatformImage",
+                    "publisher": "MicrosoftWindowsDesktop",
+                    "offer": "office-365",
+                    "sku": "win10-21h2-avd-m365-g2",
+                    "version": "latest"
+            },
+            "customize": [
+
+                    {
+                        "type": "PowerShell",
+                        "name": "installFsLogix",
+                        "runElevated": true,
+                        "runAsSystem": true,
+                        "scriptUri": "https://raw.githubusercontent.com/HenryGelderbloem/Azure-IaC/main/AVD/AIB/installFsLogix.ps1"
+                    },
+                    {
+                        "type": "PowerShell",
+                        "name": "OptimizeOS",
+                        "runElevated": true,
+                        "runAsSystem": true,
+                        "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/14_Building_Images_WVD/1_Optimize_OS_for_WVD.ps1"
+                    },
+                    {
+                        "type": "WindowsRestart",
+                        "restartCheckCommand": "write-host 'Restarting post Optimisations'",
+                        "restartTimeout": "15m"
+                    },
+                    {
+                        "type": "WindowsUpdate",
+                        "searchCriteria": "IsInstalled=0",
+                        "filters": [
+                            "exclude:$_.Title -like '*Preview*'",
+                            "include:$true"
+                                    ],
+                        "updateLimit": 40
+                    },
+                    {
+                        "type": "WindowsRestart",
+                        "restartCheckCommand": "write-host 'Restarting post Windows Update.'",
+                        "restartTimeout": "15m"
+                    },
+                    {
+                        "type": "WindowsUpdate",
+                        "searchCriteria": "IsInstalled=0",
+                        "filters": [
+                            "exclude:$_.Title -like '*Preview*'",
+                            "include:$true"
+                                    ],
+                        "updateLimit": 40
+                    }
+            ],
+            "distribute": 
+            [
+                {   
+                    "type": "SharedImage",
+                    "galleryImageId": "[concat('subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('galleryImageResourceGroup'), '/providers/Microsoft.Compute/galleries/', parameters('galleryImageName'), '/images/', parameters('imageDefName'), variables('imageDefVersionNumber'))]",
+                    "runOutputName": "avdWind10Gen2GoldenImage",
+                    "artifactTags": {},
+                    "replicationRegions": [
+                        "[variables('location')]"
+                    ]
+                }
+            ]
+            }
+        }
+
+    
+    ]
+}    
