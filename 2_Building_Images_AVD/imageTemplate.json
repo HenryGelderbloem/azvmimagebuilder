@@ -33,7 +33,6 @@
         "imageDefVersionNumber": "[concat(variables('currentYear'),'.', variables('currentMonth'), '.', variables('curretnDate'))]"
     },
 
-
     "resources": [
       {
         "name": "[parameters('imageTemplateName')]",
@@ -72,7 +71,7 @@
                         "name": "installFsLogix",
                         "runElevated": true,
                         "runAsSystem": true,
-                        "scriptUri": "https://raw.githubusercontent.com/HenryGelderbloem/Azure-IaC/main/AVD/AIB/installFsLogix.ps1"
+                        "scriptUri": "https://raw.githubusercontent.com/HenryGelderbloem/azvmimagebuilder/main/2_Building_Images_AVD/0_installFsLogix.ps1"
                     },
                     {
                         "type": "PowerShell",
@@ -83,7 +82,7 @@
                     },
                     {
                         "type": "WindowsRestart",
-                        "restartCheckCommand": "write-host 'Restarting post Optimisations'",
+                        "restartCheckCommand": "Write-Host 'Restarting post Optimisations'",
                         "restartTimeout": "15m"
                     },
                     {
