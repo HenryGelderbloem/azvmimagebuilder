@@ -74,6 +74,11 @@
                         "scriptUri": "https://raw.githubusercontent.com/HenryGelderbloem/azvmimagebuilder/main/2_Building_Images_AVD/0_installFsLogix.ps1"
                     },
                     {
+                        "type": "WindowsRestart",
+                        "restartCheckCommand": "Write-Host 'Restarting FsLogix Update'",
+                        "restartTimeout": "15m"
+                    },
+                    {
                         "type": "PowerShell",
                         "name": "OptimizeOS",
                         "runElevated": true,
