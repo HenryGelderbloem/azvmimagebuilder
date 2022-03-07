@@ -1,29 +1,27 @@
-# install webSoc svc - To-do
-Write-Host 'AIB Customisation: Downloading the Teams WebSocket Service'
-$webSocketsURL = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RE4AQBt'
+# Setup of the required environment variables
+$appName = 'Teams'
+$tempDirectory = 'C:\Temp\'
+New-Item `
+    -Path $tempDirectory `
+    -Name $appName `
+    -ItemType Directory `
+    -ErrorAction SilentlyContinue
+$LocalPath = $tempDirectory + $appName
+
+# Update Microsoft Teams WebSocket Service
+Write-Host 'AIB Customisation: Downloading the Microsoft Teams WebSocket Service'
+$webSocketsURL = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWQ1UW'
 $webSocketsInstallerMsi = 'webSocketSvc.msi'
 $outputPath = $LocalPath + '\' + $webSocketsInstallerMsi
 (New-Object System.Net.WebClient).DownloadFile("$webSocketsURL","$outputPath")
-Write-Host 'AIB Customisation: Downloading of the Teams WebSocket Service finished'
+Write-Host 'AIB Customisation: Downloading of the Microsoft Teams WebSocket Service finished'
 
-Write-Host 'AIB Customisation: Comparing Teams WebSocket Service versions'
-$downloadedWebSocketVersion = Get-Item $outputPath | Select-Object VersionInfo
-Write-Host 'AIB Customisation: Downloaded version number:' $downloadedWebSocketVersion.VersionInfo.FileVersion
-$installedWebSocketVersion = Get-Item "???" | Select-Object VersionInfo
-Write-Host 'AIB Customisation: Installed version number:' $installedWebSocketVersion.VersionInfo.FileVersion
-
-if ([version]$downloadedWebSocketVersion.VersionInfo.FileVersion -gt [version]$installedWebSocketVersion.VersionInfo.FileVersion) {
-    Write-Host 'AIB Customisation: Downloaded version is greator than that installed. Updating Microsoft Teams.'
-    Start-Process `
+Write-Host 'AIB Customisation: Updating the Microsoft Teams WebSocket Service'
+Start-Process `
     -FilePath msiexec.exe `
-    -Args "/I $outputPath /quiet /norestart /log webSocket.log" `
+    -Args "/i $outputPath /quiet /norestart /log webSocket.log" `
     -Wait
-    $installedWebSocketVersion = Get-Item "???" | Select-Object VersionInfo
-    Write-Host 'AIB Customisation: Installed version number is now:' $installedWebSocketVersion.VersionInfo.FileVersion
-    Write-Host 'AIB Customisation: Finished updating the Teams WebSocket Services' 
-    } else {
-    Write-Host 'AIB Customisation: Installed version matches the downloaded version. Skipping WebSocket Service update.'
-}
+Write-Host 'AIB Customisation: Finished updating the Microsoft Teams WebSocket Service' 
 
 # Update Microsoft Teams
 Write-Host 'AIB Customisation: Downloading Microsoft Teams'
@@ -35,21 +33,21 @@ Write-Host 'AIB Customisation: Downloading of Microsoft Teams installer finished
 
 Write-Host 'AIB Customisation: Comparing Microsoft Teams versions'
 $downloadedTeamsVersion = Get-Item $outputPath | Select-Object VersionInfo
-Write-Host 'AIB Customisation: Downloaded version number:' $downloadedTeamsVersion.VersionInfo.FileVersion
-$installedTeamsVersion = Get-Item "C:\Program Files\Teams Installer\Teams.exe" | Select-Object VersionInfo
-Write-Host 'AIB Customisation: Installed version number:' $installedTeamsVersion.VersionInfo.FileVersion
+Write-Host 'AIB Customisation: Downloaded Microsoft Teams version number:' $downloadedTeamsVersion.VersionInfo.FileVersion
+$installedTeamsVersion = Get-Item "C:\Program Files (x86)\Teams Installer\Teams.exe" | Select-Object VersionInfo
+Write-Host 'AIB Customisation: Installed Microsoft Teams version number:' $installedTeamsVersion.VersionInfo.FileVersion
 
 if ([version]$downloadedTeamsVersion.VersionInfo.FileVersion -gt [version]$installedTeamsVersion.VersionInfo.FileVersion) {
-    Write-Host 'AIB Customisation: Downloaded version is greator than that installed. Updating Microsoft Teams.'
+    Write-Host 'AIB Customisation: Downloaded Microsoft Teams version is greator than that installed. Updating Microsoft Teams.'
     Start-Process `
     -FilePath msiexec.exe `
     -Args "/I $outputPath /quiet /norestart /log teamsUpdate.log ALLUSER=1 ALLUSERS=1" `
     -Wait
     $installedTeamsVersion = Get-Item "C:\Program Files\Teams Installer\Teams.exe" | Select-Object VersionInfo
-    Write-Host 'AIB Customisation: Installed version number is now:' $installedTeamsVersion.VersionInfo.FileVersion
-    Write-Host 'AIB Customisation: Finished updating MS Teams' 
+    Write-Host 'AIB Customisation: Installed Microsoft Teams version number is now:' $installedTeamsVersion.VersionInfo.FileVersion
+    Write-Host 'AIB Customisation: Finished updating Microsoft Teams' 
     } else {
-    Write-Host 'AIB Customisation: Installed version matches the downloaded version. Skipping Teams update.'
+    Write-Host 'AIB Customisation: Installed Microsoft Teams version matches the downloaded version. Skipping Teams update.'
 }
 
 # Confirm registry is set correctly
@@ -84,7 +82,6 @@ if (!(Test-Path $registryPath)) {
         -Name $valueName `
         -Value $vauleData `
         -PropertyType Dword
-        -Force | Out-Null
 } elseif (!(Test-RegistryValue -Path $registryPath -Value $valueName)) {
     Write-Host 'AIB Customisation: Microsoft Teams media optimisation not set. Enabling Microsoft Teams media optimsation'
 } else {
