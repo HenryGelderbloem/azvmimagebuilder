@@ -19,6 +19,9 @@
         },
         "imageDefName": {
             "type": "string"
+        },
+        "imageDefVersionNumber": {
+            "type": "string"
         }
     },
     
@@ -26,8 +29,7 @@
         "api-version": "2021-10-01",
         "location": "[resourceGroup().location]",
         "subscriptionId": "[subscription().subscriptionId]",
-        "userManagedIdentityId": "[concat('subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('userManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userManagedIdentityName'))]",
-        "imageDefVersionNumber": "[concat(utcNow('yyyy'),'.',utcNow('mm'),'.',utcNow('dd'))]"
+        "userManagedIdentityId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('userManagedIdentityResourceGroup'), '/providers/Microsoft.ManagedIdentity/userAssignedIdentities/', parameters('userManagedIdentityName'))]"
     },
 
     "resources": [
@@ -108,7 +110,7 @@
             [
                 {   
                     "type": "SharedImage",
-                    "galleryImageId": "[concat('subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('galleryImageResourceGroup'), '/providers/Microsoft.Compute/galleries/', parameters('galleryImageName'), '/images/', parameters('imageDefName'), variables('imageDefVersionNumber'))]",
+                    "galleryImageId": "[concat('/subscriptions/', variables('subscriptionId'), '/resourceGroups/', parameters('galleryImageResourceGroup'), '/providers/Microsoft.Compute/galleries/', parameters('galleryImageName'), '/images/', parameters('imageDefName'), '/versions/', parameters('imageDefVersionNumber'))]",
                     "runOutputName": "avdWind10Gen2GoldenImage",
                     "artifactTags": {},
                     "replicationRegions": [
