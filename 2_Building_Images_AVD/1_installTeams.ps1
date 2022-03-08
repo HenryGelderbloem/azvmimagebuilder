@@ -32,8 +32,27 @@ $outputPath = $LocalPath + '\' + $teamsMsi
 Write-Host 'AIB Customisation: Downloading of Microsoft Teams installer finished'
 
 Write-Host 'AIB Customisation: Comparing Microsoft Teams versions'
-$downloadedTeamsVersion = Get-Item $outputPath | Select-Object VersionInfo
-Write-Host 'AIB Customisation: Downloaded Microsoft Teams version number:' $downloadedTeamsVersion.VersionInfo.FileVersion
+function Get-MsiVersionNumber {
+    param (
+        [parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [System.IO.FileInfo] $MSIPATH
+    )
+    try { 
+        $WindowsInstaller = New-Object -com WindowsInstaller.Installer 
+        $Database = $WindowsInstaller.GetType().InvokeMember("OpenDatabase", "InvokeMethod", $Null, $WindowsInstaller, @($MSIPATH.FullName, 0)) 
+        $Query = "SELECT Value FROM Property WHERE Property = 'ProductVersion'"
+        $View = $database.GetType().InvokeMember("OpenView", "InvokeMethod", $Null, $Database, ($Query)) 
+        $View.GetType().InvokeMember("Execute", "InvokeMethod", $Null, $View, $Null) | Out-Null
+        $Record = $View.GetType().InvokeMember( "Fetch", "InvokeMethod", $Null, $View, $Null ) 
+        $Version = $Record.GetType().InvokeMember( "StringData", "GetProperty", $Null, $Record, 1 ) 
+        return $Version
+    } catch { 
+        throw "Failed to get MSI file version: {0}." -f $_
+    }   
+}
+$downloadedTeamsVersion = Get-MsiVersionNumber -MSIPATH $outputPath
+Write-Host 'AIB Customisation: Downloaded Microsoft Teams version number:' $downloadedTeamsVersion
 $installedTeamsVersion = Get-Item "C:\Program Files (x86)\Teams Installer\Teams.exe" | Select-Object VersionInfo
 Write-Host 'AIB Customisation: Installed Microsoft Teams version number:' $installedTeamsVersion.VersionInfo.FileVersion
 
@@ -63,7 +82,6 @@ function Test-RegistryValue {
         [ValidateNotNullOrEmpty()]$Value
     )
     try {
-
         Get-ItemProperty -Path $Path | Select-Object -ExpandProperty $Value -ErrorAction Stop | Out-Null
         return $true
          }
