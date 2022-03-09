@@ -102,6 +102,11 @@ if (!(Test-Path $registryPath)) {
         -PropertyType Dword
 } elseif (!(Test-RegistryValue -Path $registryPath -Value $valueName)) {
     Write-Host 'AIB Customisation: Microsoft Teams media optimisation not set. Enabling Microsoft Teams media optimsation'
+    New-ItemProperty `
+        -Path $registryPath `
+        -Name $valueName `
+        -Value $vauleData `
+        -PropertyType Dword
 } else {
     Write-Host 'AIB Customisation: Microsoft Teams media optimisation set correctly'
 }
