@@ -56,7 +56,7 @@ Write-Host 'AIB Customisation: Downloaded Microsoft Teams version number:' $down
 $installedTeamsVersion = Get-Item "C:\Program Files (x86)\Teams Installer\Teams.exe" | Select-Object VersionInfo
 Write-Host 'AIB Customisation: Installed Microsoft Teams version number:' $installedTeamsVersion.VersionInfo.FileVersion
 
-if ([version]$downloadedTeamsVersion.VersionInfo.FileVersion -gt [version]$installedTeamsVersion.VersionInfo.FileVersion) {
+if ([version]$downloadedTeamsVersion -gt [version]$installedTeamsVersion.VersionInfo.FileVersion) {
     Write-Host 'AIB Customisation: Downloaded Microsoft Teams version is greator than that installed. Updating Microsoft Teams.'
     Start-Process `
     -FilePath msiexec.exe `
