@@ -10,7 +10,7 @@ $localPath = $tempDirectory + $appName
 
 # Download Virtual Desktop Optimisation Tool (VDOT)
 Write-Host 'AIB Customisation: Downloading VDOT Files'
-$vdotUrl = 'https://github.com/The-Virtual-Desktop-Team/Virtual-Desktop-Optimization-Tool/archive/master.zip'
+$vdotUrl = 'https://github.com/HenryGelderbloem/VDOT/archive/main.zip'
 $installerFile = 'Windows_10_VDI_Optimize-master.zip'
 $outputPath = $localPath + '\' + $installerFile
 (New-Object System.Net.WebClient).DownloadFile("$vdotUrl","$outputPath")
@@ -19,7 +19,7 @@ Expand-Archive `
   -DestinationPath $localPath `
   -Force `
   -Verbose
-$vdotScriptUrl = 'https://raw.githubusercontent.com/The-Virtual-Desktop-Team/Virtual-Desktop-Optimization-Tool/master/Win10_VirtualDesktop_Optimize.ps1'
+$vdotScriptUrl = 'https://raw.githubusercontent.com/HenryGelderbloem/VDOT/main/Windows_VDOT.ps1'
 $scriptFile = 'optimise.ps1'
 $outputScriptPath = $localPath + '\' + $scriptFile 
 (New-Object System.Net.WebClient).DownloadFile("$vdotScriptUrl","$outputScriptPath")
