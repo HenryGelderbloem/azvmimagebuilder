@@ -89,7 +89,7 @@
                         "name": "OptimizeOS",
                         "runElevated": true,
                         "runAsSystem": true,
-                        "scriptUri": "https://raw.githubusercontent.com/danielsollondon/azvmimagebuilder/master/solutions/14_Building_Images_WVD/1_Optimize_OS_for_WVD.ps1"
+                        "scriptUri": "https://raw.githubusercontent.com/HenryGelderbloem/azvmimagebuilder/main/2_Building_Images_AVD/2_optimiseOsforAVD.ps1"
                     },
                     {
                         "type": "WindowsRestart",
