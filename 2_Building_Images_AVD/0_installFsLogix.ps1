@@ -1,29 +1,30 @@
 # Global Variables
 $lastError = @()
 
-# FSLogix Directory Creation Variables
-$appName = 'FsLogix'
+# FSLogix Directory Creation Parameters & Variables
+$appName = 'FSLogix'
 $tempDirectory = 'C:\Temp\'
 $appPath = $tempDirectory + $appName
 $NewItemParameters = @{
     Path = $tempDirectory
     Name = $appName
-    ItemType = "Direcotry"
+    ItemType = "Directory"
     ErrorAction = "Stop"
     ErrorVariable = "lastError"
+    Force = $true
 }
 
-# FSLogix Download Parameters
-$fsLogixURI = "https://aka.ms/fslogix_download"
+# FSLogix Download Parameters & Variables
+$FSLogixURI = "https://aka.ms/fslogix_download"
 $downloadedFile = "fslogix_download.zip"
 $InvokeWebRequestParameters = @{
-    Uri = $fsLogixURI
+    Uri = $FSLogixURI
     OutFile = $downloadedFile
     ErrorAction = "Stop"
     ErrorVariable = "lastError"
 }
 
-# FSLogix Unzip Parameters
+# FSLogix Unzip Parameters & Variables
 $ExpandArchiveParameters = @{
     Path = $downloadedFile
     DestinationPath = $appPath
@@ -32,6 +33,27 @@ $ExpandArchiveParameters = @{
     ErrorAction = "Stop"
     ErrorVariable = "lastError"
 }
+
+# FSLogix Uninstall Parameters & Variables
+$UninstallFSLogixParameters = @{
+    FilePath = "$appPath\x64\Release\FSLogixAppsSetup.exe"
+    ArgumentList = "/uninstall /quiet /norestart"
+    Wait = $true
+    Passthru = $true
+    ErrorAction = "Stop"
+    ErrorVariable = "lastError"
+}
+
+# FSLogix Install Parameters & Variables
+$InstallFSLogixParameters = @{
+    FilePath = "$appPath\x64\Release\FSLogixAppsSetup.exe"
+    ArgumentList = "/install /quiet /norestart"
+    Wait = $true
+    Passthru = $true
+    ErrorAction = "Stop"
+    ErrorVariable = "lastError"
+}
+
 
 # FSLogix Directory Creation
 # Creates a new folder in C:\Temp with the name FSLogix.
@@ -79,18 +101,18 @@ catch {
 # Compares the downloaded version of FSLogix with the installed version.
 Write-Host -Object "AIB Customisation: Comparing FSLogix versions."
 
-$downloadedFslogixVersion = Get-Item $appPath\x64\Release\FSLogixAppsSetup.exe | Select-Object VersionInfo
-Write-Host "AIB Customisation: Downloaded FSLogix Version Number $downloadedFsLogixVersion.VersionInfo.FileVersion."
+$downloadedFSLogixVersion = Get-Item $appPath\x64\Release\FSLogixAppsSetup.exe | Select-Object VersionInfo
+Write-Host "AIB Customisation: Downloaded FSLogix Version Number $($downloadedFSLogixVersion.VersionInfo.FileVersion)."
 
-$installedFslogixVersion = Get-Item "C:\Program Files\FSLogix\Apps\frx.exe" | Select-Object VersionInfo
-Write-Host -Object "AIB Customisation: Installed FsLogix Version Number: $installedFSlogixVersion.VersionInfo.FileVersion."
+$installedFSLogixVersion = Get-Item "C:\Program Files\FSLogix\Apps\frx.exe" -ErrorAction SilentlyContinue | Select-Object VersionInfo
+Write-Host -Object "AIB Customisation: Installed FsLogix Version Number: $($installedFSLogixVersion.VersionInfo.FileVersion)."
 
-if ([version]$downloadedFsLogixVersion.VersionInfo.FileVersion -gt [version]$installedFsLogixVersion.VersionInfo.FileVersion) {
-    Write-Host -Object "AIB Customisation: Downloaded FsLogix version is greater than that installed. Updating FSLogix."
+if ([version]$downloadedFSLogixVersion.VersionInfo.FileVersion -gt [version]$installedFSLogixVersion.VersionInfo.FileVersion) {
+    Write-Host -Object "AIB Customisation: Downloaded FSLogix version is greater than that installed. Updating FSLogix."
     try {
-        Write-Host -Object "AIB Customisation: Uninstalling FsLogix."    # This is required to be able to install the latest version.
-        Start-Process -FilePath $LocalPath\x64\Release\FSLogixAppsSetup.exe -ArgumentList "/uninstall /quiet /norestart" -Wait -PassThru -ErrorAction Stop -ErrorVariable $lastError
-        Write-Host -Object "AIB Customisation: Uninstalled FsLogix."
+        Write-Host -Object "AIB Customisation: Uninstalling FSLogix."    # This is required to be able to install the latest version, if an update is required.
+        Start-Process @UninstallFSLogixParameters
+        Write-Host -Object "AIB Customisation: Uninstalled FSLogix."
     }
     catch {
         Write-Host -Object "AIB Customisation Error: Unable to uninstall FSLogix."
@@ -98,12 +120,12 @@ if ([version]$downloadedFsLogixVersion.VersionInfo.FileVersion -gt [version]$ins
         Write-Host -Object "Exit code: $LASTEXITCODE"
     }
     try {
-        Write-Host "AIB Customisation: Installing FsLogix."
-        Start-Process -FilePath $LocalPath\x64\Release\FSLogixAppsSetup.exe -ArgumentList "/install /quiet /norestart" -Wait -PassThru -ErrorAction Stop -ErrorVariable $lastError
-        Write-Host -Object "AIB Customisation: Installed FsLogix."
-        $installedFsLogixVersion = Get-Item "C:\Program Files\FSLogix\Apps\frx.exe" | Select-Object VersionInfo
-        Write-Host "AIB Customisation: Installed FsLogix version number is now: $installedFSLogixVersion.VersionInfo.FileVersion."
-        Write-Host "AIB Customisation: Finished Fslogix installer."
+        Write-Host "AIB Customisation: Installing FSLogix."
+        Start-Process @InstallFSLogixParameters
+        Write-Host -Object "AIB Customisation: Installed FSLogix."
+        $installedFSLogixVersion = Get-Item "C:\Program Files\FSLogix\Apps\frx.exe" | Select-Object VersionInfo
+        Write-Host "AIB Customisation: Installed FSLogix version number is now: $($installedFSLogixVersion.VersionInfo.FileVersion)."
+        Write-Host "AIB Customisation: Finished installing FSLogix."
     }
     catch {
         Write-Host -Object "AIB Customisation Error: Unable to install FSLogix."
@@ -111,5 +133,5 @@ if ([version]$downloadedFsLogixVersion.VersionInfo.FileVersion -gt [version]$ins
         Write-Host -Object "Exit code: $LASTEXITCODE"
     }
 } else {
-    Write-Host -Object "AIB Customisation: Installed FsLogix version matches the downloaded version. Skipping FsLogix update."
+    Write-Host -Object "AIB Customisation: Installed FSLogix version matches the downloaded version. Skipping FSLogix update."
 }
