@@ -17,7 +17,7 @@ $NewItemParameters = @{
 # Teams WebSocket Download Parameters & Variables
 $webSocketsURL = 'https://query.prod.cms.rt.microsoft.com/cms/api/am/binary/RWQ1UW'
 $webSocketsInstallerMsi = 'webSocketSvc.msi'
-$outputPath = $appPath + '\' + $webSocketsInstallerMsi
+$outputPath = "$appPath\$webSocketsInstallerMsi"
 $InvokeWebRequestParameters = @{
     Uri = $webSocketsURL
     OutFile = $outputPath
@@ -26,12 +26,20 @@ $InvokeWebRequestParameters = @{
 }
 
 # Teams WebSocket Install Parameters & Variables
+$webSocketInstallArgsParameters = @(
+    '/i'
+    $outputPath
+    '/quiet'
+    '/norestart'
+    "/log $appPath\webSocket.log"
+)
 $webSocketInstallParameters = @{
     FilePath = "msiexec.exe"
-    Args = "/i $outputPath /quiet /norestart /log webSocket.log"
+    ArgumentList = $webSocketInstallArgsParameters
     Wait = $true
     ErrorAction = "Stop"
     ErrorVariable = "lastError"
+    PassThru = $true
 }
 
 # Teams Download Parameters & Variables
@@ -69,20 +77,21 @@ function Get-MsiVersionNumber {
 # Teams Update Parameters & Variables
 $teamsUpdateParameters = @{
     FilePath = "msiexec.exe"
-    Argus = "/I $outputPath /quiet /norestart /log teamsUpdate.log ALLUSER=1 ALLUSERS=1"
+    Args = "/I $outputPath /quiet /norestart /log teamsUpdate.log ALLUSER=1 ALLUSERS=1"
     Wait = $true
     ErrorAction = "Stop"
     ErrorVariable = "lastError"
 }
 
 # Teams Media Optimisations Paramets & Variables
+$registryPath  = "HKLM:SOFTWARE\Microsoft\Teams"
 $optimisationItemPropertyParameters = @{
-    registryPath = "HKLM:SOFTWARE\Microsoft\Teams"
+    registryPath = $registryPath
     vauleName = "IsWVDEnvironment"
     vauleData = "1"
 }
 $optimisationItemParameters = @{
-    registryPath = "HKLM:SOFTWARE\Microsoft\Teams"
+    registryPath = $registryPath
 }
 
 # Teams Optimsation Check Function
